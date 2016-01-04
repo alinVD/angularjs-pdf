@@ -36,11 +36,14 @@
       },
       link: function(scope, element, attrs) {
         element.css('display', 'block');
-        var url = scope.pdfUrl;
+        // scope alias if constructorAs is used
+        var alias = attrs.alias;
+        var url = alias ? scope[alias].pdfUrl : scope.pdfUrl;
+        var data = alias ? scope[alias].pdfData : scope.pdfData;
         var pdfDoc = null;
         var pageToDisplay = isFinite(attrs.page) ? parseInt(attrs.page) : 1;
         var pageFit = attrs.scale === 'page-fit';
-        var scale = attrs.scale > 0 ? attrs.scale : 1;
+        var scale = pageFit ? 1 : parseInt(attrs.scale);
         var canvasid = attrs.canvasid || 'pdf-canvas';
         var canvas = document.getElementById(canvasid);
 
@@ -154,11 +157,17 @@
         function renderPDF() {
           clearCanvas();
 
-          if (url && url.length) {
-            pdfLoaderTask = PDFJS.getDocument({
-              'url': url,
-              'withCredentials': creds
-            }, null, null, scope.onProgress);
+          if (url && url.length || data && data.byteLength > 0) {
+            pdfLoaderTask = PDFJS.getDocument(
+              data && data.byteLength > 0 ? // data takes preference
+              {
+                'data': data,
+                'withCredentials': creds
+              } : // if not, load the url
+              {
+                'url': url,
+                'withCredentials': creds
+              }, null, null, scope.onProgress);
             pdfLoaderTask.then(
                 function(_pdfDoc) {
                   if (typeof scope.onLoad === 'function') {
@@ -189,13 +198,9 @@
           }
         });
 
-        scope.$watch('pdfUrl', function(newVal) {
-          if (newVal !== '') {
-            if (debug) {
-              console.log('pdfUrl value change detected: ', scope.pdfUrl);
-            }
-            url = newVal;
-            scope.pageNum = scope.pageToDisplay = pageToDisplay;
+        // Function to reload the pdf cleanly.
+        scope.cleanReload = function() {
+          scope.pageNum = scope.pageToDisplay = pageToDisplay;
             if (pdfLoaderTask) {
                 pdfLoaderTask.destroy().then(function () {
                     renderPDF();
@@ -203,6 +208,16 @@
             } else {
                 renderPDF();
             }
+        }
+
+        // Watch for changes of the URL
+        scope.$watch('pdfUrl', function(newVal) {
+          if (newVal !== '') {
+            if (debug) {
+              console.log('pdfUrl value change detected: ', scope.pdfUrl);
+            }
+            url = newVal;
+            scope.cleanReload();
           }
         });
 

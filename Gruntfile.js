@@ -117,6 +117,18 @@ module.exports = function(grunt) {
       unit: {
         configFile: 'test/karma.conf.js'
       }
+    },
+    // local serving of files so Chrome does not complain
+    'http-server': {
+        'dev': {
+          root: 'example/',
+          port: 8282,
+          host: '127.0.0.1',
+          ext: 'html',
+          runInBackground: false,
+          openBrowser: false,
+          logFn: function() { }
+        }
     }
   });
 
@@ -128,6 +140,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-jsonlint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-http-server');
 
   grunt.registerTask('default', [
     'clean',
@@ -145,4 +158,9 @@ module.exports = function(grunt) {
     'jshint',
     'karma'
   ]);
+
+  grunt.registerTask('live', [
+    'copy', // copy first the files
+    'http-server' // start the local server
+    ]);
 };

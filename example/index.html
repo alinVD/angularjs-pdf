@@ -10,6 +10,7 @@
 
 <div class="wrapper" ng-controller="DocCtrl">
   <h1>{{pdfName}}</h1>
+  <input type="file" onchange="angular.element(this).scope().upload(this.files)">
   <ng-pdf template-url="partials/viewer.html" canvasid="pdf" scale="page-fit" page=13></ng-pdf>
 </div>
 
