@@ -1,7 +1,4 @@
 <nav ng-class="getNavStyle(scroll)">
-  <button ng-click="goPrevious()"><</span></button>
-  <button ng-click="goNext()">></span></button>
-
   <button ng-click="zoomIn()">+</span></button>
   <button ng-click="fit()">100%</span></button>
   <button ng-click="zoomOut()">-</span></button>
@@ -21,4 +18,6 @@
 <hr>
 
 {{loading}}
-<canvas id="pdf" class="rotate0"></canvas>
+<div id="pdf-container">
+  <canvas ng-repeat="id in pageIDs" ng-attr-id="{{id}}" ng-class="canvasClass" style="border: 1px black solid; padding: 5px;"></canvas>
+</div>

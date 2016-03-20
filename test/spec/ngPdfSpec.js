@@ -28,16 +28,8 @@ describe('ngPdf', function() {
       }, 9000);
   }, 10000);
 
-  it('ng-pdf maust have 1 canvas', function() {
+  it('ng-pdf maust have 56 canvases', function() {
     var canvas = element.find('canvas');
-    expect(canvas.length).toBe(1);
-  });
-
-  it('goNext and goPrevious change page', function(){
-      expect($scope.pageNum).toBe(13);
-      $scope.goPrevious();
-      expect($scope.pageNum).toBe(12);
-      $scope.goNext();
-      expect($scope.pageNum).toBe(13);
+    expect(canvas.length).toBe(56);
   });
 });
