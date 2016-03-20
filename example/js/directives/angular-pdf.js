@@ -1,4 +1,5 @@
 /*! Angular-PDF Version: 2.1.0 | Released under an MIT license */
+/* globals Waypoint */
 (function() {
 
   'use strict';
@@ -48,6 +49,8 @@
         var canvasContId = attrs.containerid || 'pdf-container';
         scope.pageIDs = [];
         scope.canvasClass = 'rotate0';
+        // array of waypoints to detect scrolling
+        var waypoints = [];
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
         var creds = attrs.usecredentials;
@@ -84,6 +87,13 @@
             var canvas = document.getElementById(scope.pageIDs[num - 1]);
             var ctx = canvas.getContext('2d');
             setCanvasDimensions(canvas, viewport.width, viewport.height);
+
+            waypoints[num - 1] = new Waypoint({
+              element: canvas,
+              handler: function() {
+                scope.pageNum = num;
+              }
+            });
 
             renderContext = {
               canvasContext: ctx,
@@ -205,7 +215,6 @@
             scope.cleanReload();
           }
         });
-
       }
     };
   } ]);

@@ -62,6 +62,13 @@ module.exports = function(grunt) {
             dest: 'example/js/lib',
             flatten: true,
             expand: true
+          },
+          {
+            cwd: 'bower_components/waypoints/lib/',
+            src: [ 'noframework.waypoints.min.js' ],
+            dest: 'example/js/lib',
+            flatten: true,
+            expand: true
           }
         ]
       }

@@ -16,6 +16,7 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
 
 1. [AngularJS](http://angularjs.org/) - get the latest [angular.min.js](https://developers.google.com/speed/libraries/devguide#angularjs)
 - [PDFJS](http://mozilla.github.io/pdf.js/) - build the files [`pdf.js` and `pdf.worker.js`](https://github.com/mozilla/pdf.js#building-pdfjs)
+- [Waypoints](http://imakewebthings.com/waypoints/) - get the latest waypoints bower package and include `noframework.waypoints.min.js` in your project.
 - [Evergreen browsers](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#what-browsers-are-supported)
 
 ## Features
@@ -158,6 +159,10 @@ $scope.onError = function(error) {
 	// console.log(error);
 }
 ```
+
+### Display current page number
+
+`angularjs-pdf` uses `waypoints` to determine on what page the current view is. Display variable `pageNum` to inform the user or the postition. `pageNum` is automatically updated upon scrolling.  
 
 ### Show loading
 
