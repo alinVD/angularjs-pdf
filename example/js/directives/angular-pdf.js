@@ -1,10 +1,11 @@
-/*! Angular-PDF Version: 1.2.9 | Released under an MIT license */
+/*! Angular-PDF Version: 2.0.0 | Released under an MIT license */
 (function() {
 
   'use strict';
 
-  angular.module('pdf', []).directive('ngPdf', [ '$window', function($window) {
-    var renderTask = null;
+  angular.module('pdf', []).directive('ngPdf', [ '$window', '$timeout',
+    function($window, $timeout) {
+    var renderTask = []; // array of render tasks, one per page
     var pdfLoaderTask = null;
     var debug = false;
 
@@ -44,12 +45,13 @@
         var pageToDisplay = isFinite(attrs.page) ? parseInt(attrs.page) : 1;
         var pageFit = attrs.scale === 'page-fit';
         var scale = pageFit ? 1 : parseInt(attrs.scale);
-        var canvasid = attrs.canvasid || 'pdf-canvas';
-        var canvas = document.getElementById(canvasid);
+        var canvasContId = attrs.containerid || 'pdf-container';
+        scope.pageIDs = [];
+        scope.canvasClass = 'rotate0';
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
         var creds = attrs.usecredentials;
-        var ctx = canvas.getContext('2d');
+
         var windowEl = angular.element($window);
 
         windowEl.on('scroll', function() {
@@ -62,8 +64,8 @@
         scope.pageNum = pageToDisplay;
 
         scope.renderPage = function(num) {
-          if (renderTask) {
-              renderTask._internalRenderTask.cancel();
+          if (renderTask[num]) {
+              renderTask[num]._internalRenderTask.cancel();
           }
 
           pdfDoc.getPage(num).then(function(page) {
@@ -78,7 +80,9 @@
               scale = pageWidthScale;
             }
             viewport = page.getViewport(scale);
-
+            // pageIDs has index starting at 0
+            var canvas = document.getElementById(scope.pageIDs[num - 1]);
+            var ctx = canvas.getContext('2d');
             setCanvasDimensions(canvas, viewport.width, viewport.height);
 
             renderContext = {
@@ -97,66 +101,45 @@
           });
         };
 
-        scope.goPrevious = function() {
-          if (scope.pageToDisplay <= 1) {
-            return;
+        /**
+         * Renders all the pages
+         * @return {[type]} [description]
+         */
+        scope.renderAllPages = function() {
+          for (var i = 1; i <= scope.pageCount; i = i + 1){
+            scope.renderPage(i);
           }
-          scope.pageToDisplay = parseInt(scope.pageToDisplay) - 1;
-          scope.pageNum = scope.pageToDisplay;
-        };
-
-        scope.goNext = function() {
-          if (scope.pageToDisplay >= pdfDoc.numPages) {
-            return;
-          }
-          scope.pageToDisplay = parseInt(scope.pageToDisplay) + 1;
-          scope.pageNum = scope.pageToDisplay;
-        };
+        }
 
         scope.zoomIn = function() {
           pageFit = false;
           scale = parseFloat(scale) + 0.2;
-          scope.renderPage(scope.pageToDisplay);
+          scope.renderAllPages();
           return scale;
         };
 
         scope.zoomOut = function() {
           pageFit = false;
           scale = parseFloat(scale) - 0.2;
-          scope.renderPage(scope.pageToDisplay);
+          scope.renderAllPages();
           return scale;
         };
 
         scope.fit = function() {
           pageFit = true;
-          scope.renderPage(scope.pageToDisplay);
+          scope.renderAllPages();
         }
-
-        scope.changePage = function() {
-          scope.renderPage(scope.pageToDisplay);
-        };
 
         scope.rotate = function() {
-          if (canvas.getAttribute('class') === 'rotate0') {
-            canvas.setAttribute('class', 'rotate90');
-          } else if (canvas.getAttribute('class') === 'rotate90') {
-            canvas.setAttribute('class', 'rotate180');
-          } else if (canvas.getAttribute('class') === 'rotate180') {
-            canvas.setAttribute('class', 'rotate270');
-          } else {
-            canvas.setAttribute('class', 'rotate0');
+          switch (scope.canvasClass){
+            case 'rotate0': scope.canvasClass = 'rotate90'; break;
+            case 'rotate90': scope.canvasClass = 'rotate180'; break;
+            case 'rotate180': scope.canvasClass = 'rotate270'; break;
+            case 'rotate270': scope.canvasClass = 'rotate0'; break
           }
         };
 
-        function clearCanvas() {
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-          }
-        }
-
         function renderPDF() {
-          clearCanvas();
-
           if (url && url.length || data && data.byteLength > 0) {
             pdfLoaderTask = PDFJS.getDocument(
               data && data.byteLength > 0 ? // data takes preference
@@ -175,11 +158,20 @@
                   }
 
                   pdfDoc = _pdfDoc;
-                  scope.renderPage(scope.pageToDisplay);
 
                   scope.$apply(function() {
                     scope.pageCount = _pdfDoc.numPages;
+                    var pageIDs = [];
+                    for (var i = 1; i <= scope.pageCount; i = i + 1){
+                      pageIDs.push(canvasContId + i);
+                    }
+                    scope.pageIDs = pageIDs;
                   });
+
+                  // render pages once they are all setup
+                  $timeout(function() {
+                    scope.renderAllPages();
+                  }); // do we need this delay?
                 }, function(error) {
                   if (error) {
                     if (typeof scope.onError === 'function') {
@@ -190,13 +182,6 @@
             );
           }
         }
-
-        scope.$watch('pageNum', function(newVal) {
-          scope.pageToDisplay = parseInt(newVal);
-          if (pdfDoc !== null) {
-            scope.renderPage(scope.pageToDisplay);
-          }
-        });
 
         // Function to reload the pdf cleanly.
         scope.cleanReload = function() {

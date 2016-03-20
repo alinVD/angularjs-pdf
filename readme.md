@@ -1,6 +1,6 @@
 # angular-pdf [![Build Status](https://travis-ci.org/sayanee/angularjs-pdf.svg)](https://travis-ci.org/sayanee/angularjs-pdf) [![Dependency Status](https://gemnasium.com/sayanee/angularjs-pdf.svg)](https://gemnasium.com/sayanee/angularjs-pdf)
 
-Version: 1.2.9
+Version: 2.0.0
 
 >An [AngularJS](http://angularjs.org/) [directive](http://docs.angularjs.org/guide/directive) `ng-pdf` to display PDF files with [PDFJS](http://mozilla.github.io/pdf.js/).
 
@@ -20,11 +20,9 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
 
 ## Features
 
-1. next / previous page
-- zoom in / out / fit 100%
+1. zoom in / out / fit 100%
 - rotate clockwise
-- jump to a page number
-- when scrolling, the pdf controls will get fixed position at the top
+- continous scrolling through pages
 - define the view template
 - define the path to pdf with scope variable
 - handles error
@@ -68,15 +66,10 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
         ```html
         <ng-pdf template-url="/partials/viewer.html" scale="page-fit"></ng-pdf>
         ```
-    - `page` as an option for initial page number
+    - `containerid` as an option for `id` of the canvas container (default for `containerid` is `pdf-container`)
 
         ```html
-        <ng-pdf template-url="/partials/viewer.html" page=12></ng-pdf>
-        ```
-    - `canvasid` as an option for `id` of the canvas (default for `canvasid` is `pdf-canvas`)
-
-        ```html
-        <ng-pdf template-url="/partials/viewer.html" canvasid="mycanvas"></ng-pdf>
+        <ng-pdf template-url="/partials/viewer.html" containerid="mycanvas"></ng-pdf>
         ```
     - `usecredentials` as an option to add credentials / authorisation
 
@@ -88,11 +81,14 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
         ```html
         <ng-pdf template-url="/partials/viewer.html" debug="true"></ng-pdf>
         ```
-- include the `canvas` element to display the pdf in the template-url file
+- include the `container` element to display the pdf in the template-url file
 
     ```html
-    <canvas id="pdf-canvas"></canvas>
+    <div id="pdf-container">
+         <canvas ng-repeat="id in pageIDs" ng-attr-id="{{id}}"></canvas>
+    </div>
     ```
+    you have to use the `pageIDs` to find the list of IDs for each page and set the attribute `id` accordingly. The `canvas` element can be styled as you with.
 - include the path to the pdf file in the controller
 
     ```js
@@ -100,16 +96,11 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
         $scope.pdfUrl = '/pdf/relativity.pdf';
     });
     ```
+    or provide a value for `pdfData` field of the parent. 
 
 ### Options
 
-1. **Next / Previous page**: Include the controls in the view file as defined in the attribute `template-url`
-
-    ```
-    <button ng-click="goPrevious()"><</span></button>
-    <button ng-click="goNext()">></span></button>
-    ```
-- **Zoom in / out / fit 100%**: Include the controls in the view file as defined in the attribute `template-url`
+1. **Zoom in / out / fit 100%**: Include the controls in the view file as defined in the attribute `template-url`
 
     ```
     <button ng-click="zoomIn()">+</span></button>
@@ -131,11 +122,6 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
     .rotate90 {-webkit-transform: rotate(90deg); transform: rotate(90deg); }
     .rotate180 {-webkit-transform: rotate(180deg); transform: rotate(180deg); }
     .rotate270 {-webkit-transform: rotate(270deg); transform: rotate(270deg); }
-    ```
-- **Jump to page number**: Include the controls in the view file as defined in the attribute `template-url`
-
-    ```html
-    <span>Page: </span><input type="text" min=1 ng-model="pageNum"><span> / {{pageCount}}</span>
     ```
 - **Fixed pdf controls upon scrolling**: Wrap the controls in the view file as defined in the attribute `template-url` with a tag `nav` with an `ng-class`. Amend the scroll amount as required.
 
@@ -161,7 +147,7 @@ Create a Blob:
 currentBlob = new Blob([result], {type: 'application/pdf'});
 $scope.pdfUrl = URL.createObjectURL(currentBlob);
 ```
-
+or set attribute `pdfData`.
 ### Handle error
 
 In the controller, you can call the function `$scope.onError`:
