@@ -1,4 +1,4 @@
-/*! Angular-PDF Version: 2.1.1 | Released under an MIT license */
+/*! Angular-PDF Version: 2.1.2 | Released under an MIT license */
 /* globals Waypoint */
 (function() {
 
