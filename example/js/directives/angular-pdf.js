@@ -52,7 +52,7 @@
         // array of waypoints to detect scrolling
         var waypoints = [];
         var containerEl = document.getElementById(canvasContId);
-        var parentContext = attrs.parentcontext || false;
+        var contextEl = document.getElementById(attrs.context);
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
         var creds = attrs.usecredentials;
@@ -97,12 +97,12 @@
               };
 
             waypoints[num - 1] = new Waypoint(
-              parentContext ? {
+              contextEl ? {
                 element: canvas,
                 handler: handler,
                 offset: -1, // Default 0 is not good enough.
                 // It does not trigger the first page
-                context: containerEl
+                context: contextEl
             } : {
                 element: canvas,
                 handler: handler,

@@ -125,7 +125,7 @@ Check [`bower.json` file](https://github.com/sayanee/angularjs-pdf/blob/master/b
     .rotate180 {-webkit-transform: rotate(180deg); transform: rotate(180deg); }
     .rotate270 {-webkit-transform: rotate(270deg); transform: rotate(270deg); }
     ```
-- **Confine the rendering within fixed size container**: When the `canvas` elements are included in a fixed size controller, the waypoints need to be given the parent context. Add  the option `parentcontext="true"` to `ng-pdf` directive to indicate this. This way, the current page is corectly updated on scroll.
+- **Confine the rendering within fixed size container**: When the `canvas` elements are included in a fixed size controller, the waypoints need to be given the parent context. Add  the option `context="containerID"` to `ng-pdf` directive to indicate this. This way, the current page is corectly updated on scroll.
 - **Fixed pdf controls upon scrolling**: Wrap the controls in the view file as defined in the attribute `template-url` with a tag `nav` with an `ng-class`. Amend the scroll amount as required.
 
     ```html

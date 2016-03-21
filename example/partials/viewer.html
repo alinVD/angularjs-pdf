@@ -17,6 +17,6 @@
 <hr>
 
 {{loading}}
-<div id="pdf-container">
+<div id="pdf-container" style="height:800px; overflow: auto;">
   <canvas ng-repeat="id in pageIDs" ng-attr-id="{{id}}" ng-class="canvasClass" style="border: 1px black solid; padding: 5px;"></canvas>
 </div>
