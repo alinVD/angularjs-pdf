@@ -51,6 +51,8 @@
         scope.canvasClass = 'rotate0';
         // array of waypoints to detect scrolling
         var waypoints = [];
+        var containerEl = document.getElementById(canvasContId);
+        var parentContext = attrs.parentcontext || false;
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
         var creds = attrs.usecredentials;
@@ -63,7 +65,7 @@
           });
         });
 
-        PDFJS.disableWorker = true;
+        PDFJS.disableWorker = false;
         scope.pageNum = pageToDisplay;
 
         scope.renderPage = function(num) {
@@ -88,12 +90,25 @@
             var ctx = canvas.getContext('2d');
             setCanvasDimensions(canvas, viewport.width, viewport.height);
 
-            waypoints[num - 1] = new Waypoint({
-              element: canvas,
-              handler: function() {
-                scope.pageNum = num;
-              }
+            var handler = function() {
+                scope.$apply( function() {
+                  scope.pageNum = num;
+                });
+              };
+
+            waypoints[num - 1] = new Waypoint(
+              parentContext ? {
+                element: canvas,
+                handler: handler,
+                offset: -1, // Default 0 is not good enough.
+                // It does not trigger the first page
+                context: containerEl
+            } : {
+                element: canvas,
+                handler: handler,
+                offset: -1
             });
+            Waypoint.refreshAll();
 
             renderContext = {
               canvasContext: ctx,
